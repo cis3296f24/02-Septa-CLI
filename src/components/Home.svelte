@@ -2,6 +2,7 @@
     import TripPlanner from "./TripPlanner.svelte";
     import TimeTable from "./TimeTable.svelte";
     import Map from "./Map.svelte";
+    import Marquee from "./Marquee.svelte";
 
     let latitude, longitude;
 
@@ -26,22 +27,11 @@
             }
         });
     }
-
-    // Event listener for the "Fetch Locations" button
-    async function fetchLocations() {
-        try {
-            const position = await getCurrentPosition();
-            latitude = position.coords.latitude;
-            longitude = position.coords.longitude;
-            console.log("Latitude:", latitude);
-            console.log("Longitude:", longitude);
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    }
 </script>
 
 <main class="grid-container">
+    <!-- Marquee for Warnings -->
+    <Marquee />
     <div class="tabs">
         <ul class="sidebar">
             <li id="Plan-Trip">
@@ -72,7 +62,7 @@
     <div class="map-container">
         <Map {latitude} {longitude} />
     </div>
-    <!-- schedule form-->
+
 </main>
 
 <style>
@@ -118,6 +108,14 @@
         width: 100%;
         z-index: 1;
     }
+    @keyframes scroll {
+        from {
+            transform: translateX(0%);
+        }
+        to {
+            transform: translateX(-100%);
+        }
+    }
 
     .scheduleFetchBackground {
         /* display: none; */
@@ -135,7 +133,6 @@
         position: relative;
         width: 25%;
         z-index: 2;
-        /* pointer-events: none; */
     }
 
     @media (min-width: 640px) {
