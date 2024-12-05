@@ -7,26 +7,6 @@
     let latitude, longitude;
 
     // Function to get the current position
-    function getCurrentPosition() {
-        return new Promise((resolve, reject) => {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    function (position) {
-                        resolve(position);
-                    },
-                    function (error) {
-                        reject(error);
-                    },
-                );
-            } else {
-                reject(
-                    new Error(
-                        "Geolocation API is not available in this browser.",
-                    ),
-                );
-            }
-        });
-    }
 </script>
 
 <main class="grid-container">
