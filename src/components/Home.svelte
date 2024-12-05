@@ -1,79 +1,65 @@
 <script>
     import TripPlanner from './TripPlanner.svelte';
-    import TimeTable from "./TimeTable.svelte";
-    import Map from './Map.svelte';
+    import TimeTable from './TimeTable.svelte';
+    import mapboxgl from 'mapbox-gl';
+    import 'mapbox-gl/dist/mapbox-gl.css';
+  import Marquee from "./Marquee.svelte";
 
-    let latitude, longitude;
-    
-    // Function to get the current position
-    function getCurrentPosition() {
-        return new Promise((resolve, reject) => {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    function (position) {
-                        resolve(position);
-                    },
-                    function (error) {
-                        reject(error);
-                    }
-                );
-            } else {
-                reject(new Error("Geolocation API is not available in this browser."));
-            }
-        });
-    }
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia2hpdGNoIiwiYSI6ImNtM2d1cXN4MTA5YWIya3B4Y3didnBxM3QifQ.GPCb_j31HQhkDYmqvwKgLg'; // Move this to .env or secrets manager
 
-    // Event listener for the "Fetch Locations" button
-    async function fetchLocations() {
-        try {
-            const position = await getCurrentPosition();
-            latitude = position.coords.latitude;
-            longitude = position.coords.longitude;
-            console.log("Latitude:", latitude);
-            console.log("Longitude:", longitude);
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    }
+   
 </script>
 
 <main class="grid-container">
-  <!-- Form -->
-  <TripPlanner/>
-  <input type="button" id="fetch-button" value="Fetch Locations" on:click={fetchLocations} />
-  
-  <!-- Map -->
-  <div class="map-container">
-      <Map {latitude} {longitude} />
-  </div>
-  <!-- schedule form-->
-  <div class="scheduleFetchBackground">
-      <TimeTable />
-  </div>
+    <!-- Marquee for Warnings -->
+    <Marquee/>
+
+    <!-- Form -->
+    <TripPlanner />
+
+    <!-- Map -->
+    <div class="map-container">
+        <div id="map" style="height: 500px; width: 100%;"></div>
+    </div>
+
+    <!-- Schedule Form -->
+    <div class="scheduleFetchBackground">
+        <TimeTable />
+    </div>
 </main>
 
 <style>
+    @keyframes scroll {
+        from {
+            transform: translateX(0%);
+        }
+        to {
+            transform: translateX(-100%);
+        }
+    }
+
+    /* Main Grid Layout */
     .grid-container {
         display: grid;
-        grid-template-columns: 1fr 2fr; 
-        grid-template-rows: auto auto; 
-        gap: 20px; 
+        grid-template-columns: 1fr 2fr;
+        grid-template-rows: auto auto;
+        gap: 20px;
         padding: 1em;
         max-width: 1000px;
-        margin: 0 auto;
+        margin: 40px auto; /* Add space for the marquee */
     }
 
     .map-container {
-        grid-column: 2; 
-        grid-row: 1; 
-        height: 500px; 
+        grid-column: 2;
+        grid-row: 1;
+        height: 500px;
     }
 
     .scheduleFetchBackground {
         background-color: #d9d9d9;
         padding: 1em;
-        grid-column: 1 / span 2; 
-        grid-row: 2; 
+        grid-column: 1 / span 2;
+        grid-row: 2;
         width: 50%;
     }
 
