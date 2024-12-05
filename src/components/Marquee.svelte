@@ -1,16 +1,11 @@
 <script>
     import { onMount } from "svelte";
 
-    import mapboxgl from 'mapbox-gl';
-    import 'mapbox-gl/dist/mapbox-gl.css';
-    mapboxgl.accessToken = 'pk.eyJ1Ijoia2hpdGNoIiwiYSI6ImNtM2d1cXN4MTA5YWIya3B4Y3didnBxM3QifQ.GPCb_j31HQhkDYmqvwKgLg'; // Move this to .env or secrets manager
-
     let warnings = "Loading SEPTA alerts...";
-    let map;
 
     // Fetch SEPTA alerts for all routes with warnings
     const fetchSEPTAAlerts = async () => {
-        const endpoint = `http://localhost:3333/api/septa_alerts`;
+        const endpoint = `/api/septa_alerts`;
 
         try {
             const response = await fetch(endpoint);
@@ -36,16 +31,8 @@
         }
     };
 
-    // Initialize map and fetch alerts on mount
     onMount(() => {
         fetchSEPTAAlerts();
-
-        map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [-75.1652, 39.9526], // Philadelphia coordinates
-            zoom: 13
-        });
     });
 </script>
 

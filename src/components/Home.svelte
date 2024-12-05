@@ -1,25 +1,44 @@
 <script>
-    import TripPlanner from './TripPlanner.svelte';
-    import TimeTable from './TimeTable.svelte';
-    import mapboxgl from 'mapbox-gl';
-    import 'mapbox-gl/dist/mapbox-gl.css';
-  import Marquee from "./Marquee.svelte";
+    import TripPlanner from "./TripPlanner.svelte";
+    import TimeTable from "./TimeTable.svelte";
+    import Map from "./Map.svelte";
+    import Marquee from "./Marquee.svelte";
 
-    mapboxgl.accessToken = 'pk.eyJ1Ijoia2hpdGNoIiwiYSI6ImNtM2d1cXN4MTA5YWIya3B4Y3didnBxM3QifQ.GPCb_j31HQhkDYmqvwKgLg'; // Move this to .env or secrets manager
+    let latitude, longitude;
 
-   
+    // Function to get the current position
+    function getCurrentPosition() {
+        return new Promise((resolve, reject) => {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        resolve(position);
+                    },
+                    function (error) {
+                        reject(error);
+                    },
+                );
+            } else {
+                reject(
+                    new Error(
+                        "Geolocation API is not available in this browser.",
+                    ),
+                );
+            }
+        });
+    }
 </script>
 
 <main class="grid-container">
     <!-- Marquee for Warnings -->
-    <Marquee/>
+    <Marquee />
 
     <!-- Form -->
     <TripPlanner />
 
     <!-- Map -->
     <div class="map-container">
-        <div id="map" style="height: 500px; width: 100%;"></div>
+        <Map {latitude} {longitude} />
     </div>
 
     <!-- Schedule Form -->
