@@ -5,7 +5,7 @@
 
     // Fetch SEPTA alerts for all routes with warnings
     const fetchSEPTAAlerts = async () => {
-        const endpoint = `http://localhost:3333/api/septa_alerts`;
+        const endpoint = `/api/septa_alerts`;
 
         try {
             const response = await fetch(endpoint);
