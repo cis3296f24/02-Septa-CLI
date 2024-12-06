@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Client, Status } = require("@googlemaps/google-maps-services-js");
-const path = require('path')
-const fs = require('node:fs'); // for debug
-// require('dotenv').config({path: path.join(__dirname,'..', '..', 'keys.env')})
+// const fs = require('node:fs'); // for debug
 require('dotenv').config({ path: './keys.env' });
 
 const apiKey = process.env.GOOGLE_API_KEY;
@@ -57,11 +55,8 @@ router.get('/train_arrivals', async (req, res) => {
 
 router.post('/google_directions', async (req, res) => {
     console.log(`POST /api/google_directions`);
-    
-    
     const data = req.body;
     // console.log(JSON.stringify(data)); // for debug
-    // sanitize data
 
     // check leave/depart choice + time
     const time = (Date.parse(data.date + "T" + data.time) / 1000); // conversion to seconds
@@ -82,7 +77,7 @@ router.post('/google_directions', async (req, res) => {
         if (selections[mode] === true)
             transitModes.push(mode.toLowerCase());
     }
-    // console.log(transitModes); for debug
+    // console.log(transitModes); //for debug
 
     // send req
     const client = new Client({});
@@ -99,11 +94,11 @@ router.post('/google_directions', async (req, res) => {
         },
         timeout: 1000
     }).then(r => {
-        fs.writeFile("./directions_output.json", JSON.stringify(r.data, null, 2), (err) => {
-            if (err) {
-                console.error(err);
-            }
-        }); // comment this out if you dont want response output written to disk
+        // fs.writeFile("./directions_output.json", JSON.stringify(r.data, null, 2), (err) => {
+        //     if (err) {
+        //         console.error(err);
+        //     }
+        // }); // comment this out if you dont want response output written to disk
         const routes = r.data.routes;
         res.json(JSON.stringify(routes));
     }).catch(e => {
@@ -125,11 +120,11 @@ router.post('/autocomplete', async (req, res) => {
             key: apiKey
         }
     }).then(r => {
-        fs.writeFile("./autocomplete_suggestions.json", JSON.stringify(r.data, null, 2), (err) => {
-            if (err) {
-                console.error(err);
-            }
-        }); // comment this out if you dont want response output written to disk
+        // fs.writeFile("./autocomplete_suggestions.json", JSON.stringify(r.data, null, 2), (err) => {
+        //     if (err) {
+        //         console.error(err);
+        //     }
+        // }); // comment this out if you dont want response output written to disk
         res.json(r.data);
     }).catch(e => {
         console.error(e);

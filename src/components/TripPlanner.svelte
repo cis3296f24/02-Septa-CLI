@@ -5,13 +5,16 @@
     let radio = "leave";
     let stops = ["", ""];
     let suggestions = {};
+    let routes = [];
+    //property state
+    let showDetails = Array(routes.length).fill(false);
     let focusedTextBox = null;
-
     // clears auto suggest when user clicks out of text box
     document.body.addEventListener("click", () => {
-        const suggestionsBox = document.querySelector(".autocomplete-suggestions")
-        if (suggestionsBox) 
-            suggestionsBox.classList.toggle("hidden");
+        const suggestionsBox = document.querySelector(
+            ".autocomplete-suggestions",
+        );
+        if (suggestionsBox) suggestionsBox.classList.toggle("hidden");
     });
     // Auto suggest
     const suggestLocation = async (event) => {
@@ -19,7 +22,7 @@
         if (str === "") {
             suggestions = {};
         } else {
-            console.log(str);
+            // console.log(str);
             const res = await fetch("/api/autocomplete", {
                 method: "POST",
                 body: JSON.stringify({ input: str }),
@@ -65,9 +68,9 @@
             date: date.value,
             time: time.value,
             transitModes: {
-                Bus: bus,
-                Subway: subway,
-                Rail: rail,
+                Bus: $bus,
+                Subway: $subway,
+                Rail: $rail,
             },
         };
         // send data to trip creation function
@@ -86,60 +89,16 @@
         });
         if (!res.ok) {
             console.log(`${res.status}: ${res.statusText}`);
+            document.querySelector(".routes").innerHTML =
+                "Could not fetch directions";
             return;
         }
-        let routes = await res.json();
+        routes = await res.json();
         routes = JSON.parse(routes);
-        // write to DOM
-        displayTrips(routes);
+        updateShowDetailsState();
     }
-
-    function displayTrips(routes) {
-        const container = document.querySelector(".routes");
-        // clear previous html
-        container.innerHTML = "";
-
-        routes.forEach((route) => {
-            const routeContainer = document.createElement("div");
-            routeContainer.className = "route";
-
-            route.legs.forEach((leg) => {
-                const legContainer = document.createElement("div");
-                legContainer.className = "leg";
-                const startContainer = document.createElement("div");
-                startContainer.className = "start-location";
-                startContainer.innerHTML = leg.start_address;
-                legContainer.appendChild(startContainer);
-                console.log(leg.start_address);
-                routeContainer.appendChild(legContainer);
-
-                leg.steps.forEach((step) => {
-                    const stepContainer = document.createElement("div");
-                    stepContainer.className = "step";
-                    console.log(step.html_instructions);
-                    stepContainer.innerHTML = step.html_instructions;
-
-                    // check if step contains substeps
-                    if (step.steps) {
-                        const subStepContainer = document.createElement("div");
-                        subStepContainer.className = "substep";
-
-                        step.steps.forEach((subStep) => {
-                            if (containsHTML(subStep)) {
-                                console.log(subStep.html_instructions);
-                                subStepContainer.innerHTML =
-                                    subStep.html_instructions;
-                            }
-                        });
-                        stepContainer.appendChild(subStepContainer);
-                    }
-                    legContainer.appendChild(stepContainer);
-                });
-            });
-            document.querySelector(".routes").appendChild(routeContainer);
-        });
-
-        container.style.display = "block"; // makes routes div visible
+    function updateShowDetailsState() {
+        showDetails = Array(routes.length).fill(false);
     }
     // checks whether object has key "html_instructions"
     function containsHTML(step) {
@@ -172,6 +131,26 @@
     function updateStopsText() {
         for (let index = 0; index < stops.length; index++)
             document.getElementById("stop" + index).value = stops[index];
+    }
+
+    function toggleDetails(index) {
+        showDetails[index] = !showDetails[index];
+    }
+
+    function getTransitMode(route) {
+        console.log(route.legs);
+        for (const leg of route.legs) {
+            for (const step of leg.steps) {
+                if (step.travel_mode === "TRANSIT") {
+                    console.log(step.transit_details.line.vehicle.name);
+                    return {
+                        name: step.transit_details.line.vehicle.name,
+                        icon: step.transit_details.line.vehicle.icon,
+                    }; // Exit the function early and return the value
+                }
+            }
+        }
+        return "None"; // If no transit step was found, return "None"
     }
 </script>
 
@@ -312,19 +291,111 @@
                 on:click={handleFormSubmit}
             />
         </form>
+        {#each routes as route, index}
+            <div class="route-info">
+                <button
+                    on:click={() => {
+                        toggleDetails(index);
+                        console.log(showDetails);
+                    }}
+                >
+                    <img
+                        src={getTransitMode(route).icon}
+                        alt={getTransitMode(route).name}
+                    />
+                    <span id="times"
+                        >Depart At: {route.legs[0].departure_time.text}</span
+                    >
+                    <span id="times"
+                        >Arrival At: {route.legs[0].arrival_time.text}</span
+                    >
+                </button>
+            </div>
+            {#if showDetails[index]}
+                <div class="route">
+                    {#each route.legs as leg}
+                        <div class="leg">
+                            <!-- <div class="start-info">{leg.departure_time.text}</div> -->
+                            {#each leg.steps as step}
+                                <div class="step">
+                                    <span id="duration"
+                                        >{step.duration.text}</span
+                                    >
+                                    <span id="distance"
+                                        >{step.distance.text}</span
+                                    >
+                                    <div class="instructions">
+                                        {@html step.html_instructions}
+                                        {#if step.steps}
+                                            {#each step.steps as subStep}
+                                                <div class="substep">
+                                                    {#if containsHTML(subStep)}
+                                                        <div
+                                                            id="substep-instructions"
+                                                        >
+                                                            {@html subStep.html_instructions}
+                                                        </div>
+                                                    {/if}
+                                                </div>
+                                            {/each}
+                                        {/if}
+                                    </div>
+                                </div>
+                            {/each}
+                            <!-- <div class="end-info">{leg.arrival_time.text}</div> -->
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+        {/each}
     </div>
-    <div class="routes"></div>
 </div>
 
 <style>
-    .tp-body {
-        overflow-y: scroll;
-        
+    #tp-body {
+        width: 392px;
+        height: 600px;
     }
+    .route-info {
+        display: flex;
+        background-color: #f0f0f0;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        /* width: 100%;
+        height: 100%; */
+    }
+
+    .route-info button {
+        background-color: white;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: flex-start;
+        text-align: left;
+        margin: 0;
+    }
+    .route-info button img {
+        align-self: center; /* Centers the image vertically within the button */
+        margin-bottom: 10px; /* Adds spacing between the image and the times */
+    }
+    #times {
+        margin-top: 5px; /* Adds some spacing between the times */
+        text-align: right; /* Aligns times to the right */
+        width: 100%; /* Ensures the times take up the full width */
+        display: block; /* Makes sure each time is on its own line */
+    }
+    .route-info:hover {
+        background-color: gray;
+    }
+
     .userInputBackground {
         background-color: #d9d9d9;
-        /* max-width: 360px; */
+        max-width: 360px;
         padding: 1em;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
     }
 
     .inlineElements {
@@ -334,9 +405,9 @@
         align-items: center;
     }
 
-    .routes {
+    /* .routes {
         display: none;
-    }
+    } */
 
     .autocomplete-suggestions {
         position: absolute;
@@ -375,5 +446,22 @@
 
     button:hover {
         background-color: #d3d3d3;
+    }
+
+    .route {
+        margin: 20px;
+    }
+
+    .leg {
+        padding: 5px;
+    }
+
+    .step {
+        border-bottom: 2px dashed gray;
+    }
+
+    .substep {
+        font-size: 12px;
+        border-bottom: 1px dashed gray;
     }
 </style>
