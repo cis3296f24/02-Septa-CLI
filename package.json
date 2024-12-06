@@ -1,12 +1,12 @@
 {
   "name": "02-septa-cli",
   "version": "1.0.0",
-  "description": "Put here a short paragraph describing your project. \r Adding an screenshot or a mockup of your application in action would be nice.",
+  "description": "A web client for SEPTA navigation using Svelte, Rollup, and Google Maps/Mapbox APIs.",
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "start": "node src/app.js",
     "clean": "rm -rf public/build/"
   },
@@ -17,14 +17,23 @@
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-terser": "^0.4.0",
+    "@sveltejs/vite-plugin-svelte": "^1.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/svelte": "^5.2.6",
+    "jsdom": "^25.0.1",
     "rollup": "^3.29.5",
     "rollup-plugin-css-only": "^4.3.0",
     "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.1.2",
-    "svelte": "^3.55.0"
+    "rollup-plugin-svelte": "github:sveltejs/rollup-plugin-svelte",
+    "svelte": "^3.59.2",
+    "svelte-preprocess": "^4.10.7",
+    "vite": "^3.2.11",
+    "vitest": "^2.1.8",
+    "vitest-dom": "^0.1.1"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",
+    "dequal": "^2.0.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mapbox-gl": "^3.8.0",
