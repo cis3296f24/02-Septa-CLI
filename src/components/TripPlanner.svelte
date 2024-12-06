@@ -317,9 +317,13 @@
 </div>
 
 <style>
+    .tp-body {
+        overflow-y: scroll;
+        
+    }
     .userInputBackground {
         background-color: #d9d9d9;
-        max-width: 360px;
+        /* max-width: 360px; */
         padding: 1em;
     }
 
