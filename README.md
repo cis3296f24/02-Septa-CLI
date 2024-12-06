@@ -7,6 +7,9 @@ In order to use certain features a google api key is required with the following
 - Google Directions API
 
 Add your key to a .env file named **keys.env**
+```
+GOOGLE_API_KEY=YOUR_KEY_HERE
+```
 # How to run   
 
 - Open command prompt and run the following command:
