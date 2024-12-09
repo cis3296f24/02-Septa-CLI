@@ -157,52 +157,12 @@
 
     onMount(() => {
         initMap();
-        fetchLocations();
         setUserLocation();
     });
 
     afterUpdate(() => {
         updateMarkers();  // after updating checkboxes update markers
     });
-
-    // Fetch locations from the API
-    async function fetchLocations() {
-        try {
-            // Fetch locations for bus stops
-            const busResponse = await fetch('/api/locations?lon=-75.15513912656482&lat=39.98011533574885&type=bus_stops&radius=1000');
-            if (!busResponse.ok) {
-                throw new Error(`HTTP error! Status: ${busResponse.status}`);
-            }
-            const busData = await busResponse.json();
-            console.log("Bus Data:", busData);
-
-            // Fetch locations for rail stations
-            const railResponse = await fetch('/api/locations?lon=-75.15513912656482&lat=39.98011533574885&type=rail_stations&radius=1000');
-            if (!railResponse.ok) {
-                throw new Error(`HTTP error! Status: ${railResponse.status}`);
-            }
-            const railData = await railResponse.json();
-            console.log("Rail Data:", railData);
-
-            // Fetch locations for trolley stops
-            const trolleyResponse = await fetch('/api/locations?lon=-75.15513912656482&lat=39.98011533574885&type=trolley_stops&radius=1000');
-            if (!trolleyResponse.ok) {
-                throw new Error(`HTTP error! Status: ${trolleyResponse.status}`);
-            }
-            const trolleyData = await trolleyResponse.json();
-            console.log("Trolley Data:", trolleyData);
-
-            // Combine all data into one array
-            allLocations = [...busData, ...railData, ...trolleyData, ...subwayStops];
-            console.log("All Locations:", allLocations);
-
-            // Update markers 
-            updateMarkers();
-
-        } catch (error) {
-            console.error('Error fetching locations:', error);
-        }
-}
 
 
 
@@ -227,6 +187,7 @@
             .then(position => {
                 latitude = position.coords.latitude;
                 longitude = position.coords.longitude;
+                fetchLocations(); // Fetch locations after the user's location is set
                 map.setCenter([longitude, latitude]);
 
                 userLocationMarker = new mapboxgl.Marker({ color: 'blue' })
@@ -242,6 +203,53 @@
                 console.error("Error getting geolocation: ", error);
             });
     }
+
+    async function fetchLocations() {
+    try {
+        // Ensure latitude and longitude are valid numbers
+        if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+            console.error('Invalid latitude or longitude:', latitude, longitude);
+            return;
+        }
+
+        // Log the latitude and longitude to check if they are valid
+        console.log(`Fetching locations for lat: ${latitude}, lon: ${longitude}`);
+
+        // Fetch locations for bus stops
+        const busResponse = await fetch(`/api/locations?lon=${longitude}&lat=${latitude}&type=bus_stops&radius=20000`);
+        if (!busResponse.ok) {
+            throw new Error(`HTTP error! Status: ${busResponse.status}`);
+        }
+        const busData = await busResponse.json();
+        console.log("Bus Data:", busData);
+
+        // Fetch locations for rail stations
+        const railResponse = await fetch(`/api/locations?lon=${longitude}&lat=${latitude}&type=rail_stations&radius=20000`);
+        if (!railResponse.ok) {
+            throw new Error(`HTTP error! Status: ${railResponse.status}`);
+        }
+        const railData = await railResponse.json();
+        console.log("Rail Data:", railData);
+
+        // Fetch locations for trolley stops
+        const trolleyResponse = await fetch(`/api/locations?lon=${longitude}&lat=${latitude}&type=trolley_stops&radius=2000`);
+        if (!trolleyResponse.ok) {
+            throw new Error(`HTTP error! Status: ${trolleyResponse.status}`);
+        }
+        const trolleyData = await trolleyResponse.json();
+        console.log("Trolley Data:", trolleyData);
+
+        // Combine all data into one array
+        allLocations = [...busData, ...railData, ...trolleyData, ...subwayStops];
+        console.log("All Locations:", allLocations);
+
+        // Update markers 
+        updateMarkers();
+
+    } catch (error) {
+        console.error('Error fetching locations:', error);
+    }
+}
 
     // Update markers based on checkbox states
     function updateMarkers() {
